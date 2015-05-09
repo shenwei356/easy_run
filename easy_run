@@ -1,0 +1,164 @@
+#!/usr/bin/env python
+# python >= 2.7
+
+from __future__ import print_function
+import logging
+import os
+import sys
+import subprocess
+from multiprocessing import cpu_count
+
+usage = '''
+Usage: easy_run [options] command [options of command]
+
+Run command with default options in configuration file.
+
+Special inner variable ($ncpus for now) is supported, and default option flag
+could be ignored by giving value 'FALSE'.
+
+Note that, only single-value option is supported.
+
+Options:
+
+    -s, --stdin     Pass STDIN to command
+    -v, --verbose   Verbosely print information
+    -h, --help      Print this help message
+
+Example:
+
+For a configuration file:  ~/.easy_run/blastn.conf
+
+#!blastn
+
+-outfmt 11
+-show_gis
+-num_threads $ncpus
+
+1) running : easy_run -v blastn -query seq.fa -db nr
+   equal to: blastn -query seq.fa -db nr -show_gis -outfmt 11 -num_threads 4
+
+2) running : easy_run -v blastn -query seq.fa -db nr -show_gis FALSE  -num_threads 8
+   equal to: blastn -query seq.fa -db nr -num_threads 8 -outfmt 11
+
+'''
+
+config_dir = os.path.join(os.path.expanduser('~'), '.easy_run')
+
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+
+
+def read_config(config_file):
+    conf = dict()
+    with open(config_file, 'rt') as fh:
+        for line in fh:
+            line = line.strip()
+            if len(line) == 0:
+                continue
+            elif line.startswith('#!'):
+                conf['command'] = line[2:]
+            else:
+                line_data = line.split()
+                length = len(line_data)
+                value = ''
+                if length == 1:
+                    value = ''
+                else:
+                    value = ' '.join(line_data[1:])
+
+                    # special inner variable
+                    if value.startswith('$'):
+                        if value.lower() == '$ncpus':
+                            value = cpu_count()
+
+                conf[line_data[0]] = value
+    return conf
+
+
+if __name__ == '__main__':
+    if len(sys.argv) == 1:
+        logging.error(usage)
+        sys.exit(1)
+
+    config_name = ''
+    opts = dict()
+    i = 1
+    while i < len(sys.argv):
+        arg = sys.argv[i]
+        if arg.startswith('-'):
+            if arg == '-c' or arg == '--stdin':
+                opts['stdin'] = True
+            elif arg == '-h' or arg == '--help':
+                logging.error(usage)
+                sys.exit(0)
+            elif arg == '-v' or arg == '--verbose':
+                opts['verbose'] = True
+            else:
+                logging.error("[error] unkown option: {}".format_map(arg))
+                sys.exit(1)
+        else:
+            config_name = arg
+            break
+        i += 1
+
+    config_file = os.path.join(config_dir, '{}.conf'.format(config_name))
+
+    if not os.path.exists(config_dir):
+        os.mkdir(config_dir)
+    if not os.path.exists(config_file):
+        logging.warning("[warning] configuration not found: {}".format(config_file))
+        if 'verbose' in opts:
+            logging.error('[command] {}'.format(' '.join(sys.argv[i:])))
+        subprocess.call(sys.argv[i:], stdin=sys.stdin if 'stdin' in opts else None)
+        sys.exit(0)
+
+    conf = read_config(config_file)
+
+    command = ''
+    if 'command' in conf:
+        command = conf['command']
+        del conf['command']
+    else:
+        command = config_name
+
+    argv = list()
+    i += 1
+    while i < len(sys.argv):
+        arg = sys.argv[i]
+        if arg.startswith('-'):
+            if arg in conf:
+                if conf[arg] == '':
+                    i += 1
+                    if i == len(sys.argv):
+                        break
+                    if sys.argv[i].startswith('-'):
+                        argv.append(str(arg))
+                        i -= 1
+                    elif sys.argv[i] == 'FALSE':  # give up arg
+                        pass
+                    else:
+                        logging.error("[error] unwanted value for option: {}".format(sys.argv[i]))
+                        sys.exit(1)
+                else:
+                    argv.append(str(arg))
+                    i += 1
+                    if i == len(sys.argv):
+                        break
+                    argv.append(str(sys.argv[i]))
+                del conf[arg]
+            else:
+                argv.append(str(arg))
+        else:
+            argv.append(str(arg))
+        i += 1
+    for k, v in conf.items():
+        argv.extend([k, v])
+
+    cmd = [command]
+    for arg in argv:
+        if arg != '':
+            cmd.append(str(arg))
+
+    if 'verbose' in opts:
+        logging.error('[command] {}'.format(' '.join(cmd)))
+
+    subprocess.call(cmd, stdin=sys.stdin if 'stdin' in opts else None)
