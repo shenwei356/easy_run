@@ -127,24 +127,22 @@ if __name__ == '__main__':
         arg = sys.argv[i]
         if arg.startswith('-'):
             if arg in conf:
-                if conf[arg] == '':
-                    i += 1
-                    if i == len(sys.argv):
-                        break
-                    if sys.argv[i].startswith('-'):
-                        argv.append(str(arg))
-                        i -= 1
-                    elif sys.argv[i] == 'FALSE':  # give up arg
-                        pass
-                    else:
+                i += 1
+                if i == len(sys.argv):
+                    break
+
+                if sys.argv[i] == 'FALSE':  # give up arg
+                    pass                
+                elif sys.argv[i].startswith('-'):
+                    argv.append(str(arg))
+                    i -= 1
+                else:                    
+                    if conf[arg] == '':
                         logging.error("[error] unwanted value for option: {}".format(sys.argv[i]))
                         sys.exit(1)
-                else:
-                    argv.append(str(arg))
-                    i += 1
-                    if i == len(sys.argv):
-                        break
-                    argv.append(str(sys.argv[i]))
+                    else:
+                        argv.append(str(arg))
+                        argv.append(str(sys.argv[i]))
                 del conf[arg]
             else:
                 argv.append(str(arg))

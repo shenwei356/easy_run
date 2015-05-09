@@ -7,6 +7,19 @@ could be ignored by giving value 'FALSE'.
 
 Note that, only single-value options are supported.
 
+## Installation
+
+easy_run is a single script written in Python using standard library. 
+It's Python 2/3 compatible, version 2.7 or later is needed.
+
+You can simply save the [script](https://raw.githubusercontent.com/shenwei356/easy_run/master/easy_run)
+to directory included in environment PATH, e.g ```/usr/local/bin```.
+
+Or
+    
+    git clone https://github.com/shenwei356/easy_run.git
+    copy easy_run/eary_run /usr/local/bin
+
 ## Usage
 
     Usage: easy_run [options] command [options of command]
