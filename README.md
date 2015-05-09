@@ -2,10 +2,10 @@
 
 Run command with default options in configuration file.
 
-Special inner variable ($ncpus for now) is supported, and default option flag
+Special inner variables ($ncpus) are supported, and default option flags
 could be ignored by giving value 'FALSE'.
 
-Note that, only single-value option is supported.
+Note that, only single-value options are supported.
 
 ## Usage
 
@@ -30,11 +30,11 @@ For a configuration file:  ~/.easy_run/blastn.conf
 	-num_threads $ncpus
 
 	
-1) Running : ```easy_run -v blastn -query seq.fa -db nr```
-  is equal to: ```blastn -query seq.fa -db nr -show_gis -outfmt 11 -num_threads 4```
+1) Running ```easy_run -v blastn -query seq.fa -db nr```
+  is equal to  ```blastn -query seq.fa -db nr -outfmt 11 -show_gis -num_threads 4```
 
-2) Running : ```easy_run -v blastn -query seq.fa -db nr -show_gis FALSE  -num_threads 8```
-  is equal to: ``` blastn -query seq.fa -db nr -num_threads 8 -outfmt 11```
+2) Running  ```easy_run -v blastn -query seq.fa -db nr -show_gis FALSE  -num_threads 8```
+  is equal to  ``` blastn -query seq.fa -db nr -num_threads 8 -outfmt 11```
 
 ## Copyright
 
