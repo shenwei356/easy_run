@@ -41,6 +41,8 @@ For a configuration file:  ~/.easy_run/blastn.conf
 2) running    : easy_run -v blastn -query seq.fa -db nr -show_gis FALSE -num_threads 8
    is equal to: blastn -query seq.fa -db nr -num_threads 8 -outfmt 11
 
+https://github.com/shenwei356/easy_run
+
 '''
 
 config_dir = os.path.join(os.path.expanduser('~'), '.easy_run')
@@ -94,7 +96,7 @@ if __name__ == '__main__':
             elif arg == '-v' or arg == '--verbose':
                 opts['verbose'] = True
             else:
-                logging.error("[error] unkown option: {}".format_map(arg))
+                logging.error("[error] unkown option: {}".format(arg))
                 sys.exit(1)
         else:
             config_name = arg
