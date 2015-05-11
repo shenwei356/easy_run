@@ -1,7 +1,14 @@
 #!/usr/bin/env python
 # python >= 2.7
+# https://github.com/shenwei356/easy_run
 
-from __future__ import print_function
+__author__ = "Wei Shen"
+__copyright__ = "Copyright 2015, easy_run"
+__credits__ = ["r"]
+__version__ = "1.0"
+__maintainer__ = "Wei Shen"
+__status__ = "Release"
+
 import logging
 import os
 import sys
@@ -42,7 +49,6 @@ For a configuration file:  ~/.easy_run/blastn.conf
    is equal to: blastn -query seq.fa -db nr -num_threads 8 -outfmt 11
 
 https://github.com/shenwei356/easy_run
-
 '''
 
 config_dir = os.path.join(os.path.expanduser('~'), '.easy_run')
